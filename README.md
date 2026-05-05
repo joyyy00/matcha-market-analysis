@@ -4,7 +4,9 @@
 1. Is matcha becoming a mainstream consumer product?
 2. What is driving the global rise of matcha consumption?
 
-## Data and Data Gathering
+---
+
+**Data and Data Gathering**
 - Google Trends
 - TikTok 
 API source: https://apify.com/clockworks/tiktok-scraper
