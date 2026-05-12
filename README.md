@@ -11,4 +11,4 @@
 - TikTok 
 API source: https://apify.com/clockworks/tiktok-scraper
 - Instagram
-API source: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login
+Graph API source: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login
