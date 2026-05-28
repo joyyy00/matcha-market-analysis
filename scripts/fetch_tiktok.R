@@ -3,7 +3,12 @@ library(jsonlite)
 library(dplyr)
 library(arrow)
 
-apify_url <- "https://api.apify.com/v2/datasets/HctGM9KZ2KgKhHXkG/items?token=apify_api_acO3hV5fb9FRSacjDDkI6TmeOCaQ4C0VZ2Kd"
+apify_url <- Sys.getenv("APIFY_URL")
+
+# Check if api url exists
+if (apify_url == "") {
+  stop("Error: APIFY_URL is missing. Check your .Renviron file.")
+}
 
 print("Fetching TikTok data from Apify...")
 
