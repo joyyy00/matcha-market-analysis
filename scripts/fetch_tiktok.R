@@ -47,6 +47,8 @@ clean_tiktok <- flat_data |>
   ) |>
   filter(!is.na(views))
 
+View(clean_tiktok)
+
 print(paste("Cleaning complete. Rows processed:", nrow(clean_tiktok)))
 
 # Save

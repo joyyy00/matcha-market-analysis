@@ -36,12 +36,15 @@ tidy_df <- tidy_df |>
   )
 
 
-
 # Filter time to start at 2016 and remove Strawberry Matcha Latte
 trends_recent <- tidy_df |>
   filter(time >= as.Date("2016-01-01"), keyword != "Strawberry Matcha Latte")
 
-# Faceted Line Plot
+
+
+#====================================
+# Smoothed Faceted Line Plot (Simple)
+#====================================
 ggplot(trends_recent, aes(x = time, y = interest, color = keyword)) +
   geom_smooth(method = "loess", se = FALSE, linewidth = 1.2) + 
   scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
@@ -58,30 +61,9 @@ ggplot(trends_recent, aes(x = time, y = interest, color = keyword)) +
     plot.title = element_text(face = "bold", size = 16)) 
 
 
-  
-# Rolling Average Line plot
-rol_avg <- trends_recent |>
-  group_by(keyword) |>
-  arrange(time) |>
-  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
-
-ggplot(rol_avg, aes(x = time, y = rolling_avg, color = keyword)) +
-  geom_line(linewidth = 1.2) +
-  scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
-  labs(
-    title = "6-Month Rolling Average of Beverage Search Interest",
-    subtitle = "Smoothed Google Trends data",
-    x = "Year",
-    y = "Rolling Average Interest") + 
-  theme_minimal() + 
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(face = "bold", size = 16)
-  )
-
-
-
-# Matcha (Umbrella term) and Matcha Drinks 
+#============================================
+# Matcha (Umbrella term) and Matcha Drinks Smooth Line plot
+#============================================
 matcha_beverages <- tidy_df %>%
   filter( keyword %in% c(
       "Matcha Latte",
@@ -90,7 +72,7 @@ matcha_beverages <- tidy_df %>%
     time >= as.Date("2016-01-01"))
 
 ggplot(matcha_beverages, aes(x = time, y = interest, color = keyword)) +
-  geom_smooth( method = "loess", se = FALSE, linewidth = 1.3) +
+  geom_smooth(method = "loess", se = FALSE, linewidth = 1.3) +
   scale_x_date( date_breaks = "2 years", date_labels = "%Y") +
   labs(
     title = "Emerging Matcha Beverage Trends",
@@ -99,10 +81,10 @@ ggplot(matcha_beverages, aes(x = time, y = interest, color = keyword)) +
     y = "Search Interest") +
   theme_minimal()
 
-matcha_beverages_plot
 
-
-# Monthly Average Seasonal Plot
+#============================================
+# Monthly Average Seasonal Line Plot
+#============================================
 monthly_avg <- tidy_df |>
   mutate(month = month(time, label = TRUE)) |>
   group_by(keyword, month) |>
@@ -118,8 +100,9 @@ ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = ke
   theme_minimal()
 
 
-
-# Growth Rate Plot
+#============================================
+# Growth Rate Smooth Line Plot
+#============================================
 growth_df <- tidy_df |>
   group_by(keyword) |>
   arrange(time) |>
@@ -131,4 +114,53 @@ ggplot(growth_df, aes(x = time, y = pct_change, color = keyword)) +
     title = "Search Interest Growth Rates",
     y = "Percent Change") +
   theme_minimal()
+
+
+
+#============================================
+# Rolling Average (6-month period) Line plot
+#============================================
+trends_recent_1 <- tidy_df |>
+  filter(time >= as.Date("2021-01-01"), keyword != "Strawberry Matcha Latte")
+
+# Rolling average (6 months)
+rol_avg_1 <- trends_recent_1 |>
+  group_by(keyword) |>
+  arrange(time) |>
+  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+
+# Get the peak month for matcha rolling average 
+peak_matcha <- rol_avg_1 |> 
+  filter(keyword == "Matcha") |> 
+  arrange(desc(rolling_avg)) |> 
+  slice(1)
+
+ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
+  geom_line() +
+  # vertical line for the peak
+  geom_vline(xintercept = peak_matcha$time, linetype = "dashed", color = "gray50") +
+  # text label pointing to the peak
+  geom_label_repel(
+    data = peak_matcha,
+    aes(label = paste("Peak Market Interest\n", format(time, "%b %Y"))),
+    nudge_y = 10,
+    nudge_x = -300,
+    show.legend = FALSE,
+    fontface = "bold",
+    color = "black", 
+    segment.colour = "black"
+  ) + 
+  labs(
+    title = "6-Month Rolling Search Momentum",
+    subtitle = "Tracking sustained interest vs. temporary viral spikes",
+    x = "Year",
+    y = "Rolling Average Interest"
+  ) + 
+  theme_minimal() + 
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", size = 16),
+    legend.position = "bottom",
+    legend.title = element_blank()
+  )
 

@@ -17,7 +17,7 @@ library(scales)
 library(lubridate)
 
 # ==========================================
-# 2. GOOGLE TRENDS DATA PREP
+# GOOGLE TRENDS DATA PREP
 # ==========================================
 all_df <- read_csv("data/clean/clean_time_series_US_5.csv")
 
@@ -43,11 +43,30 @@ tidy_df <- all_df |>
 trends_recent <- tidy_df |>
   filter(time >= as.Date("2016-01-01"), keyword != "Strawberry Matcha Latte")
 
+trends_recent_1 <- tidy_df |>
+  filter(time >= as.Date("2021-01-01"), keyword != "Strawberry Matcha Latte")
+
 # Rolling Average Dataframe
 rol_avg <- trends_recent |>
   group_by(keyword) |>
   arrange(time) |>
   mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+
+# Second Rolling Average Dataframe
+rol_avg_1 <- trends_recent_1 |>
+  group_by(keyword) |>
+  arrange(time) |>
+  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+
+  filter(keyword == "Matcha") |> 
+  arrange(desc(rolling_avg)) |> 
+  slice(1)
+  
+# Get the peak month for matcha rolling average 
+peak_matcha <- rol_avg_1 |> 
+  filter(keyword == "Matcha") |> 
+  arrange(desc(rolling_avg)) |> 
+  slice(1)
 
 # Matcha Beverages Dataframe 
 matcha_beverages <- tidy_df |>
@@ -61,7 +80,7 @@ monthly_avg <- tidy_df |>
   summarise(avg_interest = mean(interest), .groups = 'drop')
 
 # ==========================================
-# 3. TIKTOK DATA PREP
+# TIKTOK DATA PREP
 # ==========================================
 tiktok_data <- read_parquet("data/clean/clean_tiktok_data.parquet")
 
@@ -82,39 +101,37 @@ plot_data <- tiktok_data |>
 
 ## Row {height="55%"}
 
-### Macro Overview: Search Interest (2016-2026)
-```{r}
-ggplot(trends_recent, aes(x = time, y = interest, color = keyword)) +
-  geom_smooth(method = "loess", se = FALSE, linewidth = 1.2) + 
-  scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
-  facet_wrap(~keyword, scales = "free_y") + 
-  labs(
-    title = "Smoothed Google Search Interest by Beverage", 
-    x = "Year", 
-    y = "Search Interest") + 
-  theme_minimal() +
-  theme(
-    legend.position = "none", 
-    strip.text = element_text(size = 12, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(face = "bold", size = 16)
-  )
-```
-
 ### Momentum: 6-Month Rolling Average
 ```{r}
-ggplot(rol_avg, aes(x = time, y = rolling_avg, color = keyword)) +
-  geom_line(linewidth = 1.2) +
-  scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
+ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
+  geom_line() +
+  # vertical line for the peak
+  geom_vline(xintercept = peak_matcha$time, linetype = "dashed", color = "gray50") +
+  # text label pointing to the peak
+  geom_label_repel(
+    data = peak_matcha,
+    aes(label = paste("Peak Market Interest\n", format(time, "%b %Y"))),
+    nudge_y = 10,
+    nudge_x = -300,
+    show.legend = FALSE,
+    fontface = "bold",
+    color = "black", 
+    segment.colour = "black"
+  ) + 
   labs(
-    title = "6-Month Rolling Average of Beverage Search Interest",
+    title = "6-Month Rolling Search Momentum",
+    subtitle = "Tracking sustained interest vs. temporary viral spikes",
     x = "Year",
-    y = "Rolling Average Interest") + 
+    y = "Rolling Average Interest"
+  ) + 
   theme_minimal() + 
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(face = "bold", size = 16)
+    plot.title = element_text(face = "bold", size = 16),
+    legend.position = "bottom",
+    legend.title = element_blank()
   )
+
 ```
 
 ## Row {height="45%"}

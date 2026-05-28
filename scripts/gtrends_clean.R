@@ -327,13 +327,6 @@ write_csv(clean_time_series_5, "data/clean/clean_time_series_US_5.csv")
 
 
 
-################################################
-#
-#     Apify TikTok 
-# 
-################################################
-
-
 
 
 
