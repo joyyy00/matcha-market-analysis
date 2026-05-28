@@ -1,35 +1,27 @@
-# Matcha Market Trend Analysis
-### From Niche to Mainstream: Analyzing the Rise of Matcha Lattes Through Consumer and Market Signals
+# Matcha Market Expansion Analysis
+### Analyzing the Rise of Matcha Lattes Through Consumer and Market Signals
+
+A data-driven Quarto dashboard analyzing consumer trends, search momentum, and social media intent regarding matcha products in the United States market. 
 
 
-## Overview
-This project analyzes the rise of matcha lattes as a mainstream consumer beverage using search trend data, social media signals, and café market expansion data.
+## Dashboard Overview
 
-<<<<<<< HEAD
+The final interactive dashboard is built with Quarto and features two primary analytical tracks:
+1. **Macro Search Trends:** An analysis of Google Trends data (2016-2026) to track the 6-month rolling average of search interest, seasonality, and the emergence of specialized variations (e.g., Strawberry Matcha).
+2. **Micro Social Intent:** An analysis of TikTok engagement metrics to calculate "Intent to Purchase" ratios by comparing passive views to active saves.
 
-=======
-The analysis focuses on identifying demand signals, consumer behavior patterns, and market responses that indicate how matcha beverages evolved from a niche product into a widely adopted café and retail trend.
-
-The project combines:
-- Consumer trend analysis
-- Social media analytics
-- Market and retail analysis
-- Time-series visualization
-- Data wrangling and dashboard development
-
-The final deliverable is an interactive Quarto dashboard built primarily in R
+## Tools & Architecture
+TBD
 
 
-## Objectives
-### Main Research Question:
-Are matcha lattes transitioning from a niche café beverage into a mainstream consumer product?
+## Data Pipeline
+TBD
 
-### Supporting Questions:
-1) How has online interest in matcha beverages changed over time?
-2) What role does social media play in matcha beverage popularity?
-3) How are cafés and beverage brands responding to consumer demand?
-4) How does matcha compare to other trendy beverages in consumer interest?
 
-## Tools 
-R, Python, Quarto
->>>>>>> b8a89ae3855aa0e7b2d6947aa1733b16144ac2c9
+## How to Run Locally
+
+1. Clone this repository:
+   git clone [https://github.com/joyyy00/matcha-market-analysis.git](https://github.com/yourusername/matcha-market-analysis.git)
+   
+2. Install Required Packages:
+   install.packages(c("tidyverse", "arrow", "httr2", "jsonlite", "scales", "zoo"))

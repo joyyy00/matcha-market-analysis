@@ -16,6 +16,7 @@ flat_data <- jsonlite::flatten(as.data.frame(raw_data))
 
 print("Data fetched and flattened successfully! Cleaning columns...")
 
+# Cleaning
 clean_tiktok <- flat_data |>
   select(
     timestamp = createTimeISO,
@@ -46,4 +47,4 @@ print(paste("Cleaning complete. Rows processed:", nrow(clean_tiktok)))
 # Save
 write_parquet(clean_tiktok, "data/clean/clean_tiktok_data.parquet")
 
-print("Data saved.")
+print("Finished.")
