@@ -1,51 +1,51 @@
 query,search_interest,increase_percent
-matcha,100,4
-matcha tea,19,4
-matcha latte,13,6
-matcha green,11,3
-green tea matcha,11,10
-green tea,10,6
-matcha green tea,10,-1
-green matcha tea,10,4
-matcha powder,8,4
-starbucks,8,10
-starbucks matcha,8,5
-matcha starbucks,8,3
-what is matcha,6,5
-matcha caffeine,5,-1
-best matcha,5,8
-matcha coffee,4,2
-matcha near me,4,4
-matcha benefits,4,-7
-macha,3,3
-matcha recipe,3,4
-iced matcha,3,6
-how to make matcha,3,4
-matcha latte starbucks,3,7
-starbucks matcha latte,3,3
-matcha drink,3,-2
-matcha tea powder,2,-2
-matcha calories,2,5
-matcha tea latte,2,6
-iced matcha latte,2,7
-green tea powder,2,8
-caffeine in matcha,2,4
-matcha green tea powder,2,1
-does matcha have caffeine,2,1
-matcha tea benefits,2,10
-matcha tea starbucks,2,4
-benefits of matcha,2,0
-is matcha green tea,1,4
-dunkin matcha,1,10
-matcha green tea latte,1,6
-matcha latte recipe,1,30
-strawberry matcha,1,3
-抹茶,1,7
-green tea latte,1,0
-match,1,-1
-how to make matcha latte,1,9
-what is matcha tea,1,4
-matcha ice cream,1,4
-matcha green tea starbucks,1,7
-ceremonial matcha,1,0
-green tea matcha starbucks,1,8
+matcha starbucks,100,6
+starbucks matcha,96,3
+starbucks,93,0
+starbucks matcha latte,92,1
+matcha latte starbucks,91,-3
+matcha tea,73,0
+iced matcha latte,72,6
+iced matcha,71,2
+matcha iced latte,71,2
+matcha tea latte,70,-1
+matcha latte iced,70,0
+green tea latte,52,10
+green matcha latte,52,2
+green tea matcha latte,47,1
+matcha green tea,47,-3
+matcha green tea latte,46,1
+how to make matcha,42,0
+how to make matcha latte,40,-5
+matcha latte recipe,40,-10
+matcha latte calories,32,0
+matcha latte caffeine,28,1
+matcha caffeine,28,-1
+matcha tea latte starbucks,25,-3
+matcha iced latte starbucks,24,6
+matcha coffee latte,24,4
+matcha latte dunkin,24,8
+starbucks iced matcha latte,23,10
+iced matcha latte starbucks,23,0
+dunkin matcha latte,22,-6
+best matcha latte,21,-20
+what is matcha,20,-1
+what is matcha latte,19,-2
+starbucks matcha green tea latte,19,0
+matcha latte powder,19,1
+starbucks green tea latte,19,-1
+matcha green tea latte starbucks,18,1
+green tea matcha latte starbucks,18,-5
+matcha powder,18,0
+matcha near me,16,-2
+matcha latte near me,15,-3
+caffeine in matcha,15,1
+caffeine in matcha latte,14,-7
+matcha chai latte,14,3
+chai latte,14,-1
+chai matcha latte,14,-5
+matcha latte starbucks calories,13,2
+iced matcha tea latte,13,-9
+how to make a matcha latte,13,10
+starbucks matcha latte calories,13,1
+calories in matcha latte,13,-1

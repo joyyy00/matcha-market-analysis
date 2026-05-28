@@ -1,0 +1,183 @@
+---
+title: "The Matcha Market Expansion"
+format: 
+  dashboard:
+    orientation: rows
+    theme: flatly
+    nav-buttons: github
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(zoo)
+library(arrow)
+library(scales)
+library(lubridate)
+
+# ==========================================
+# 2. GOOGLE TRENDS DATA PREP
+# ==========================================
+all_df <- read_csv("data/clean/clean_time_series_US_5.csv")
+
+# Convert to tidy format and rename
+tidy_df <- all_df |>
+  pivot_longer(
+    cols = c(matcha, matcha_latte, strawberry_ml, boba, psl),
+    names_to = "keyword",
+    values_to = "interest"
+  ) |>
+  mutate(
+    keyword = recode(
+      keyword,
+      matcha = "Matcha",
+      matcha_latte = "Matcha Latte",
+      strawberry_ml = "Strawberry Matcha Latte",
+      boba = "Boba",
+      psl = "Pumpkin Spice Latte"
+    )
+  )
+
+# Filter for recent trends
+trends_recent <- tidy_df |>
+  filter(time >= as.Date("2016-01-01"), keyword != "Strawberry Matcha Latte")
+
+# Rolling Average Dataframe
+rol_avg <- trends_recent |>
+  group_by(keyword) |>
+  arrange(time) |>
+  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+
+# Matcha Beverages Dataframe 
+matcha_beverages <- tidy_df |>
+  filter(keyword %in% c("Matcha Latte", "Strawberry Matcha Latte"),
+         time >= as.Date("2016-01-01"))
+
+# Monthly Seasonality Dataframe
+monthly_avg <- tidy_df |>
+  mutate(month = month(time, label = TRUE)) |>
+  group_by(keyword, month) |>
+  summarise(avg_interest = mean(interest), .groups = 'drop')
+
+# ==========================================
+# 3. TIKTOK DATA PREP
+# ==========================================
+tiktok_data <- read_parquet("data/clean/clean_tiktok_data.parquet")
+
+plot_data <- tiktok_data |>
+  mutate(
+    caption_lower = tolower(caption),
+    category = case_when(
+      str_detect(caption_lower, "starbucks") ~ "Starbucks",
+      str_detect(caption_lower, "ceremonial") ~ "Ceremonial",
+      str_detect(caption_lower, "latte") ~ "Latte",
+      TRUE ~ "General Matcha"
+    )
+  ) |>
+  select(-caption_lower)
+```
+
+# Search Trends (Google)
+
+## Row {height="55%"}
+
+### Macro Overview: Search Interest (2016-2026)
+```{r}
+ggplot(trends_recent, aes(x = time, y = interest, color = keyword)) +
+  geom_smooth(method = "loess", se = FALSE, linewidth = 1.2) + 
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
+  facet_wrap(~keyword, scales = "free_y") + 
+  labs(
+    title = "Smoothed Google Search Interest by Beverage", 
+    x = "Year", 
+    y = "Search Interest") + 
+  theme_minimal() +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", size = 16)
+  )
+```
+
+### Momentum: 6-Month Rolling Average
+```{r}
+ggplot(rol_avg, aes(x = time, y = rolling_avg, color = keyword)) +
+  geom_line(linewidth = 1.2) +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
+  labs(
+    title = "6-Month Rolling Average of Beverage Search Interest",
+    x = "Year",
+    y = "Rolling Average Interest") + 
+  theme_minimal() + 
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", size = 16)
+  )
+```
+
+## Row {height="45%"}
+
+### Seasonality: Average Monthly Interest
+```{r}
+ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = keyword)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Average Monthly Search Interest",
+    subtitle = "An average of each month from 2016 - 2026",
+    x = "Month",
+    y = "Average Interest") + 
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 14))
+```
+
+### To Be Finished
+```{r}
+### To be Finished 
+```
+
+# Social Intent (TikTok) {orientation="columns"}
+
+## Column {width="60%"}
+
+### Purchase Intent: Saves vs. Views
+```{r}
+ggplot(plot_data, aes(x = views, y = saves, color = category)) +
+  geom_point(alpha = 0.6, size = 2.5) +
+  scale_x_log10(labels = label_comma()) + 
+  scale_y_log10(labels = label_comma()) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1) + 
+  labs(
+    title = "Intent to Purchase: Saves vs. Views",
+    subtitle = "Comparing engagement behavior across matcha market segments",
+    x = "Total Views (Log Scale)",
+    y = "Total Saves (Log Scale)",
+    color = "Market Segment"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 16))
+```
+
+## Column {width="40%"}
+
+### Engagement Depth by Niche
+```{r}
+ggplot(plot_data, aes(x = reorder(category, engagement_rate, FUN = median), 
+                      y = engagement_rate, 
+                      fill = category)) +
+  geom_boxplot(alpha = 0.7, outlier.alpha = 0.3) +
+  scale_y_continuous(labels = label_percent(), limits = c(0, 0.3)) + 
+  labs(
+    title = "Engagement Rates by Niche",
+    subtitle = "Ceremonial vs. Commercial performance",
+    x = "Market Segment",
+    y = "Engagement Rate"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 16)
+  )
+```
