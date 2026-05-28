@@ -78,7 +78,7 @@ ggplot(plot_data, aes(x = reorder(category, engagement_rate, FUN = median),
 tiktok_summary <- plot_data |>
   group_by(category) |>
   # calculate intent ratio and summarize by category
-  summarise(intent_ratio = median(saves / views, na.rm = TRUE)) |>
+  summarize(intent_ratio = median(saves / views, na.rm = TRUE)) |>
   # Standardize names to match Google Trends
   mutate(category = case_when(
     category == "General Matcha" ~ "Matcha",
@@ -91,7 +91,7 @@ View(tiktok_summary)
 google_summary <- trends_recent |>
   filter(time >= as.Date("2025-01-01")) |>
   group_by(keyword) |>
-  summarise(search_volume = mean(interest, na.rm = TRUE))
+  summarize(search_volume = mean(interest, na.rm = TRUE))
 
 View(google_summary)
 

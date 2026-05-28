@@ -64,7 +64,7 @@ ggplot(trends_recent, aes(x = time, y = interest, color = keyword)) +
 #============================================
 # Matcha (Umbrella term) and Matcha Drinks Smooth Line plot
 #============================================
-matcha_beverages <- tidy_df %>%
+matcha_beverages <- tidy_df |>
   filter( keyword %in% c(
       "Matcha Latte",
       "Strawberry Matcha Latte"
@@ -88,7 +88,7 @@ ggplot(matcha_beverages, aes(x = time, y = interest, color = keyword)) +
 monthly_avg <- tidy_df |>
   mutate(month = month(time, label = TRUE)) |>
   group_by(keyword, month) |>
-  summarise(avg_interest = mean(interest))
+  summarize(avg_interest = mean(interest))
 
 ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = keyword)) +
   geom_line(linewidth = 1.2) +
@@ -118,7 +118,7 @@ ggplot(growth_df, aes(x = time, y = pct_change, color = keyword)) +
 
 
 #============================================
-# Rolling Average (6-month period) Line plot
+# Rolling Average (3-month period) Line plot
 #============================================
 trends_recent_1 <- tidy_df |>
   filter(time >= as.Date("2021-01-01"), keyword != "Strawberry Matcha Latte")
@@ -127,7 +127,7 @@ trends_recent_1 <- tidy_df |>
 rol_avg_1 <- trends_recent_1 |>
   group_by(keyword) |>
   arrange(time) |>
-  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+  mutate(rolling_avg = rollmean(interest, k = 3, fill = NA))
 
 # Get the peak month for matcha rolling average 
 peak_matcha <- rol_avg_1 |> 
@@ -136,9 +136,9 @@ peak_matcha <- rol_avg_1 |>
   slice(1)
 
 ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
-  geom_line() +
+  geom_line(linewidth = 1.2) +
   # vertical line for the peak
-  geom_vline(xintercept = peak_matcha$time, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = peak_matcha$time, linetype = "dashed", color = "gray35") +
   # text label pointing to the peak
   geom_label_repel(
     data = peak_matcha,
@@ -164,3 +164,33 @@ ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
     legend.title = element_blank()
   )
 
+
+View(tidy_df)
+
+#============================================
+# Stats and Insights 
+#============================================
+
+# Search interest growth in percentage  
+growth_stats <- tidy_df |>
+  filter(time >= as.Date("2021-01-01")) |>
+  group_by(keyword) |>
+  summarize(
+    start = first(interest),
+    end = last(interest),
+    pct_growth = ((end - start) / start) * 100
+  )
+
+growth_stats
+
+
+std <- tidy_df |>
+  filter(time >= as.Date("2021-01-01")) |>
+  group_by(keyword) |>
+  summarize(
+    mean_interest = mean(interest),
+    sd_interest = sd(interest),
+    cv = sd_interest / mean_interest
+  )
+
+View(std)

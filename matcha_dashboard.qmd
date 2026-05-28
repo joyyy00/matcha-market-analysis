@@ -1,5 +1,5 @@
 ---
-title: "The Matcha Market Expansion"
+title: "Matcha Market Expansion Analysis"
 format: 
   dashboard:
     orientation: rows
@@ -15,6 +15,8 @@ library(zoo)
 library(arrow)
 library(scales)
 library(lubridate)
+library(ggrepel)
+library(ggbeeswarm)
 
 # ==========================================
 # GOOGLE TRENDS DATA PREP
@@ -39,6 +41,26 @@ tidy_df <- all_df |>
     )
   )
 
+# Calculate growth stats since 2021
+growth_stats <- tidy_df |>
+  filter(time >= as.Date("2021-01-01")) |>
+  group_by(keyword) |>
+  summarise(
+    start = first(interest),
+    end = last(interest),
+    pct_growth = ((end - start) / start) * 100
+  )
+
+# Calculate standard deviation since 2021
+std <- tidy_df |>
+  filter(time >= as.Date("2021-01-01")) |>
+  group_by(keyword) |>
+  summarize(
+    mean_interest = mean(interest),
+    sd_interest = sd(interest),
+    cv = sd_interest / mean_interest
+  )
+
 # Filter for recent trends
 trends_recent <- tidy_df |>
   filter(time >= as.Date("2016-01-01"), keyword != "Strawberry Matcha Latte")
@@ -56,12 +78,8 @@ rol_avg <- trends_recent |>
 rol_avg_1 <- trends_recent_1 |>
   group_by(keyword) |>
   arrange(time) |>
-  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+  mutate(rolling_avg = rollmean(interest, k = 3, fill = NA))
 
-  filter(keyword == "Matcha") |> 
-  arrange(desc(rolling_avg)) |> 
-  slice(1)
-  
 # Get the peak month for matcha rolling average 
 peak_matcha <- rol_avg_1 |> 
   filter(keyword == "Matcha") |> 
@@ -88,25 +106,80 @@ plot_data <- tiktok_data |>
   mutate(
     caption_lower = tolower(caption),
     category = case_when(
-      str_detect(caption_lower, "starbucks") ~ "Starbucks",
-      str_detect(caption_lower, "ceremonial") ~ "Ceremonial",
-      str_detect(caption_lower, "latte") ~ "Latte",
+      str_detect(caption_lower, "ceremonial") ~ "Traditional",
+      str_detect(caption_lower, "starbucks") ~ "Commercial",
+      str_detect(caption_lower, "strawberry") ~ "Flavor Innovation",
+      str_detect(caption_lower, "latte") ~ "Cafe Beverage",
       TRUE ~ "General Matcha"
     )
   ) |>
   select(-caption_lower)
 ```
 
+
 # Search Trends (Google)
 
-## Row {height="55%"}
+## Row {height="15%"}
 
-### Momentum: 6-Month Rolling Average
+### Box 1: Matcha Search Growth Since 2021
+```{r}
+#| echo: false
+#| warning: false
+matcha_growth <- growth_stats |>
+  filter(keyword == "Matcha Latte") |>
+  pull(pct_growth)
+```
+
+<div style="font-size: 2.2em; font-weight: bold; text-align: center; padding: 5px; color: #2C3E50;">
+`r sprintf("+%.1f%%", matcha_growth)`
+</div>
+
+<div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
+Increase in Google search interest of "Matcha" since 2021
+</div>
+
+### Box 2: Matcha Standard Deviation Since 2021
+```{r}
+#| echo: false
+#| warning: false
+matcha_latte_sd <- std |>
+  filter(keyword == "Matcha Latte") |>
+  pull(sd_interest)
+
+matcha_latte_cv <- std |>
+  filter(keyword == "Matcha Latte") |>
+  pull(cv)
+
+boba_sd <- std |>
+  filter(keyword == "Boba") |>
+  pull(sd_interest)
+
+boba_cv <- std |>
+  filter(keyword == "Boba") |>
+  pull(cv)
+
+cv_comparison <- sprintf("%.1f%% vs %.1f%%", matcha_latte_cv * 100, boba_cv * 100)
+```
+
+<div style="font-size: 2.2em; font-weight: bold; text-align: center; padding: 5px; color: #2C3E50;">
+`r sprintf("%.1f vs %.1f", matcha_latte_cv, boba_cv)`
+</div>
+
+<div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
+Matcha Latte has shown a steady interest since 2021 compared to Boba
+</div>
+
+### Box 3: TBD
+
+
+## Row {height="42.5%"}
+
+### Rolling Average (6-month period) Line plot
 ```{r}
 ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
-  geom_line() +
+  geom_line(linewidth = 1.2) +
   # vertical line for the peak
-  geom_vline(xintercept = peak_matcha$time, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = peak_matcha$time, linetype = "dashed", color = "gray35") +
   # text label pointing to the peak
   geom_label_repel(
     data = peak_matcha,
@@ -120,7 +193,7 @@ ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
   ) + 
   labs(
     title = "6-Month Rolling Search Momentum",
-    subtitle = "Tracking sustained interest vs. temporary viral spikes",
+    subtitle = "Tracking sustained interest vs. temporary viral spikes (2021-2026)",
     x = "Year",
     y = "Rolling Average Interest"
   ) + 
@@ -131,12 +204,11 @@ ggplot(rol_avg_1, aes(x = time, y = rolling_avg, color = keyword)) +
     legend.position = "bottom",
     legend.title = element_blank()
   )
-
 ```
 
-## Row {height="45%"}
+## Row {height="42.5%"}
 
-### Seasonality: Average Monthly Interest
+### Monthly Average Seasonal Line Plot
 ```{r}
 ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = keyword)) +
   geom_line(linewidth = 1.2) +
@@ -150,51 +222,51 @@ ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = ke
   theme(plot.title = element_text(face = "bold", size = 14))
 ```
 
-### To Be Finished
-```{r}
-### To be Finished 
-```
+# Social Intent (TikTok)
 
-# Social Intent (TikTok) {orientation="columns"}
+## Row {height="50%"}
 
-## Column {width="60%"}
-
-### Purchase Intent: Saves vs. Views
+### Consumer Engagement Patterns: Saves vs Views Scatterplot
 ```{r}
 ggplot(plot_data, aes(x = views, y = saves, color = category)) +
-  geom_point(alpha = 0.6, size = 2.5) +
+  geom_point(alpha = 0.4, size = 2.5) +
   scale_x_log10(labels = label_comma()) + 
   scale_y_log10(labels = label_comma()) +
+  # Trend line 
   geom_smooth(method = "lm", se = FALSE, linewidth = 1) + 
   labs(
-    title = "Intent to Purchase: Saves vs. Views",
-    subtitle = "Comparing engagement behavior across matcha market segments",
+    title = "Consumer Engagement Patterns: Saves vs Views",
+    subtitle = "Comparing engagement across distinct consumer personas (Commercial vs. Traditional)",
     x = "Total Views (Log Scale)",
     y = "Total Saves (Log Scale)",
     color = "Market Segment"
   ) +
   theme_minimal() +
-  theme(plot.title = element_text(face = "bold", size = 16))
+  theme(plot.title = element_text(face = "bold", size = 14))
 ```
 
-## Column {width="40%"}
+## Row {height="50%"}
 
-### Engagement Depth by Niche
+### Engagement Rate by Category Beeswarm Plot
 ```{r}
 ggplot(plot_data, aes(x = reorder(category, engagement_rate, FUN = median), 
                       y = engagement_rate, 
-                      fill = category)) +
-  geom_boxplot(alpha = 0.7, outlier.alpha = 0.3) +
-  scale_y_continuous(labels = label_percent(), limits = c(0, 0.3)) + 
+                      color = category)) +
+  geom_quasirandom(alpha = 0.6, size = 2.5, width = 0.2) +
+  # Black point to show median
+  stat_summary(fun = median, geom = "point", shape = 15, size = 3, color = "black") +
+  scale_y_continuous(labels = label_percent()) + 
+  coord_cartesian(ylim = c(0, 0.3)) + 
   labs(
-    title = "Engagement Rates by Niche",
-    subtitle = "Ceremonial vs. Commercial performance",
+    title = "Engagement Rate Distribution by Matcha Content Segment",
+    subtitle = "Black square indicates the median engagement rate. Each dot is a video.\nEngagement is calculated by (Likes+Comments+Shares+Saves / Views)",
     x = "Market Segment",
     y = "Engagement Rate"
   ) +
   theme_minimal() +
   theme(
     legend.position = "none",
-    plot.title = element_text(face = "bold", size = 16)
+    plot.title = element_text(face = "bold", size = 16),
+    axis.text.x = element_text(size = 12, face = "bold")
   )
 ```
