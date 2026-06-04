@@ -70,7 +70,7 @@ ul.task-list li input[type="checkbox"] {
         
       </div>
     </div>
-<div id="dashboard-collapse" class="navbar-collapse collapse"><ul class="navbar-nav navbar-nav-scroll me-auto" role="tablist"><li class="nav-item" role="presentation"><a id="tab-analysis" class="nav-link active" data-bs-toggle="tab" role="tab" data-bs-target="#analysis" data-scrolling="false" href="#analysis" aria-controls="analysis" aria-selected="true"><span class="nav-link-text">Analysis</span></a></li><li class="nav-item" role="presentation"><a id="tab-data" class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#data" data-scrolling="false" href="#data" aria-controls="data" aria-selected="false"><span class="nav-link-text">Data</span></a></li></ul><div class="quarto-dashboard-links"><a class="quarto-dashboard-link" href="https://github.com/joyyy00/matcha-consumer-analysis/" title="GitHub"><i class="bi bi-github"></i></a></div></div></div>
+<div id="dashboard-collapse" class="navbar-collapse collapse"><ul class="navbar-nav navbar-nav-scroll me-auto" role="tablist"><li class="nav-item" role="presentation"><a id="tab-analysis" class="nav-link active" data-bs-toggle="tab" role="tab" data-bs-target="#analysis" data-scrolling="false" href="#analysis" aria-controls="analysis" aria-selected="true"><span class="nav-link-text">Analysis</span></a></li><li class="nav-item" role="presentation"><a id="tab-data-additional-info" class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#data-additional-info" data-scrolling="false" href="#data-additional-info" aria-controls="data-additional-info" aria-selected="false"><span class="nav-link-text">Data &amp; Additional Info</span></a></li></ul><div class="quarto-dashboard-links"><a class="quarto-dashboard-link" href="https://github.com/joyyy00/matcha-consumer-analysis/" title="GitHub"><i class="bi bi-github"></i></a></div></div></div>
 </nav>
 </header>
 <div class="page-layout-custom quarto-dashboard-content bslib-gap-spacing html-fill-container bslib-page-fill quarto-dashboard-pages">  
@@ -125,7 +125,7 @@ grid-auto-rows: minmax(0, 1fr);">
 0.9x
 </div>
 <div style="text-align: center; color: #7F8C8D; font-size: 0.9em;" class="html-fill-item html-fill-container">
-<p>Despite lower total visibility, traditional “Powder Quality” content maintains 90% engagement parity with mainstream Starbucks trends.</p>
+<p>While ‘Ceremonial/Traditional’ videos have a smaller overall reach, they successfully generate 90% as much viewer engagement as Starbucks content</p>
 </div>
 </div>
 <bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
@@ -199,12 +199,22 @@ grid-auto-rows: minmax(0, 1fr);">
 </div>
 </div>
 </div>
-</div><div id="data" class="dashboard-page tab-pane grid-skip html-fill-item html-fill-container" data-orientation="columns" aria-labelledby="tab-data">
+</div><div id="data-additional-info" class="dashboard-page tab-pane grid-skip html-fill-item html-fill-container" data-orientation="columns" aria-labelledby="tab-data-additional-info">
 <div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 1fr);
 grid-auto-rows: minmax(0, 1fr);">
 <div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
 <div class="card-body html-fill-item html-fill-container">
 <p>This dashboard integrates Google Trends search data with TikTok engagement data to examine matcha as a consumer beverage, combining macro-level demand signals with social media content behavior.</p>
+<p>Google Trends Data</p>
+<p>Google Trends time-series data was collected for multiple beverage-related keywords, including matcha, matcha latte, strawberry matcha latte, boba, pumpkin spice latte, chai, mocha, cold brew, refresher, and smoothie. The dataset spans 2004–2026 on a monthly resolution for the United States.</p>
+<p>TikTok Data</p>
+<p>TikTok data was collected using the Apify API based on matcha-related hashtags. The final dataset contains approximately 520 videos. Each record includes engagement metrics such as views, likes, comments, shares, and saves.</p>
+<p>Tagging system</p>
+<p>To analyze content structure, videos were tagged using rule-based keyword detection applied to captions. These tags are not mutually exclusive, and a single video may belong to multiple tags.</p>
+Limitations
+<p>Google Trends data is a relative index and does not represent absolute search volume. It is sensitive to normalization effects across time and cannot distinguish between informational and purchase intent.</p>
+<p>TikTok data is based on hashtag scraping and therefore reflects a partial view of platform activity. Content without relevant hashtags is not captured. Engagement metrics reflect attention and interaction, not direct consumer purchasing behavior.</p>
+<p>The tagging system is rule-based and keyword-driven, meaning categories represent heuristic content signals.</p>
 </div>
 <bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
     <template>Expand</template>

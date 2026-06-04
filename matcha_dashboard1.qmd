@@ -99,9 +99,9 @@ tagged_data <- read_parquet("data/clean/clean_tiktok_data_tagged.parquet")
 tag_counts <- tagged_data |>
   summarise(
     Starbucks = sum(commercial),
-    `Powder Quality` = sum(traditional),
+    `Ceremonial/Traditional` = sum(traditional),
     `Flavors` = sum(flavor_innovation),
-    `General Matcha` = sum(cafe_beverage)
+    `Standard Matcha` = sum(cafe_beverage)
   ) |>
   pivot_longer(
     everything(),
@@ -134,9 +134,9 @@ engagement_rates <- tagged_data |>
     theme = recode(
       theme,
       commercial = "Starbucks",
-      traditional = "Powder Quality",
+      traditional = "Ceremonial/Traditional",
       flavor_innovation = "Flavors",
-      cafe_beverage = "General Beverage"
+      cafe_beverage = "Standard Matcha"
     )
   )
 
@@ -152,9 +152,9 @@ paired_stats <- tagged_data |>
 powder_stat <- engagement_rates |>
   group_by(theme) |>
   summarise(med_eng = median(engagement_rate, na.rm = TRUE), .groups = "drop") |>
-  filter(theme %in% c("Powder Quality", "Starbucks")) |>
+  filter(theme %in% c("Ceremonial/Traditional", "Starbucks")) |>
   pivot_wider(names_from = theme, values_from = med_eng) |>
-  mutate(multiplier = `Powder Quality` / Starbucks) |>
+  mutate(multiplier = `Ceremonial/Traditional` / Starbucks) |>
   pull(multiplier)
 ```
 
@@ -192,7 +192,7 @@ overlap_val <- paired_stats |> pull(pct_overlap1)
 of Starbucks matcha videos feature flavor variety (ex: strawberry matcha or ube matcha)
 </div>
 
-### Powder Quality vs. Starbucks {fill="false"}
+### Ceremonial/Traditional vs. Starbucks {fill="false"}
 ```{r}
 #| echo: false
 #| warning: false
@@ -202,7 +202,7 @@ of Starbucks matcha videos feature flavor variety (ex: strawberry matcha or ube 
 `r sprintf("%.1fx", powder_stat)`
 </div>
 <div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
-Despite lower total visibility, traditional "Powder Quality" content maintains 90% engagement parity with mainstream Starbucks trends.
+While 'Ceremonial/Traditional' videos have a smaller overall reach, they successfully generate 90% as much viewer engagement as Starbucks content
 </div>
 
 
@@ -223,7 +223,7 @@ ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
   
   labs(
     title = "Growth-Stability of Beverages",
-    subtitle = "Comparing long-term growth vs. search volume volatility",
+    subtitle = "Comparing rolling 12-month volume averages against volatility",
     x = "Long-Term Growth Rate (2021 vs. 2026)",
     y = "Volatility (Coefficient of Variation)"
   ) +
@@ -315,7 +315,29 @@ ggplot(engagement_rates, aes(x = reorder(theme, engagement_rate, FUN = median), 
 ```
 
 
-# Data
-This dashboard integrates Google Trends search data with TikTok engagement data through Apify to examine matcha as a consumer beverage, combining macro-level demand signals with social media content behavior.
+# Data & Additional Info
+This dashboard integrates Google Trends search data with TikTok engagement data to examine matcha as a consumer beverage, combining macro-level demand signals with social media content behavior.
 
 
+Google Trends Data
+
+Google Trends time-series data was collected for multiple beverage-related keywords, including matcha, matcha latte, strawberry matcha latte, boba, pumpkin spice latte, chai, mocha, cold brew, refresher, and smoothie. The dataset spans 2004–2026 on a monthly resolution for the United States.
+
+
+TikTok Data
+
+TikTok data was collected using the Apify API based on matcha-related hashtags. The final dataset contains approximately 520 videos. Each record includes engagement metrics such as views, likes, comments, shares, and saves.
+
+
+Tagging system
+
+To analyze content structure, videos were tagged using rule-based keyword detection applied to captions. These tags are not mutually exclusive, and a single video may belong to multiple tags.
+
+
+Limitations
+
+Google Trends data is a relative index and does not represent absolute search volume. It is sensitive to normalization effects across time and cannot distinguish between informational and purchase intent.
+
+TikTok data is based on hashtag scraping and therefore reflects a partial view of platform activity. Content without relevant hashtags is not captured. Engagement metrics reflect attention and interaction, not direct consumer purchasing behavior.
+
+The tagging system is rule-based and keyword-driven, meaning categories represent heuristic content signals. 
