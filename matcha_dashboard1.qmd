@@ -3,7 +3,7 @@ title: "Matcha Consumer Interest and Digital Market Analysis"
 format: 
   dashboard:
     orientation: columns
-    theme: flatly
+    theme: cosmo
     nav-buttons: github
 ---
 
@@ -210,16 +210,27 @@ While 'Ceremonial/Traditional' videos have a smaller overall reach, they success
 
 ### Growth Stability Matrix
 ```{r}
+target_growth <- 1.0
+high_vol <- 0.75
+
 ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
   # Quadrant Lines
-  geom_hline(yintercept = median_volatility, linetype = "dashed", linewidth = 0.8, color = "gray45") +
-  geom_vline(xintercept = median_growth, linetype = "dashed", linewidth = 0.8, color = "gray45") +
+  geom_hline(yintercept = high_vol, linetype = "dashed", linewidth = 0.7, color = "gray45") +
+  annotate("text", x = target_growth + 1.25, y = high_vol + 0.08, label = "High volatility \nconsidered at 75%", size = 3, color = "gray30") + 
+  geom_vline(xintercept = target_growth, linetype = "dashed", linewidth = 0.7, color = "gray45") + 
+  annotate("text", x = target_growth + 0.17, y = high_vol + 0.68, label = "Target growth \nset at 100%", size = 3, color = "gray30") +
   
-  geom_point(size = 5, color = "#0077BB", alpha = 0.8) +
-  geom_text_repel(size = 5, point.padding = 0.8, box.padding = 1.2, min.segment.length = 0, force = 3) + 
+  geom_point(size = 5, color = "#0077BB", alpha = 1) +
+  geom_text_repel(
+    # Conditional statement to set Matcha label to bold
+    aes(fontface = ifelse(keyword == "Matcha", "bold", "plain")), 
+    size = 4.5, 
+    point.padding = 0.45, 
+    box.padding = 1.2, 
+    min.segment.length = 0) + 
   
-  scale_x_continuous(labels = label_percent()) +
-  scale_y_continuous(labels = label_percent()) +
+  scale_x_continuous(labels = label_percent(), limits = c(0, 2.5)) +
+  scale_y_continuous(labels = label_percent(), limits = c(0, 1.5)) +
   
   labs(
     title = "Growth-Stability of Beverages",
@@ -228,7 +239,12 @@ ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
     y = "Volatility (Coefficient of Variation)"
   ) +
   theme_minimal() +
-  theme(plot.title = element_text(face = "bold", size = 16), panel.grid.minor = element_blank(), panel.grid.major = element_line(color = "gray90"))
+  theme(
+    plot.title = element_text(face = "bold", size = 16), 
+    panel.grid.minor = element_blank(), 
+    panel.grid.major = element_line(color = "gray90"),
+    
+  )
 ```
 
 ### Content Theme Frequency on TikTok
