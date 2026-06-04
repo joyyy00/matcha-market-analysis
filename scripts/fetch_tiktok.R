@@ -3,26 +3,38 @@ library(jsonlite)
 library(dplyr)
 library(arrow)
 
-apify_url <- Sys.getenv("APIFY_URL")
+apify_urls_str <- Sys.getenv("APIFY_URL")
 
 # Check if api url exists
-if (apify_url == "") {
+if (apify_urls_str == "") {
   stop("Error: APIFY_URL is missing. Check your .Renviron file.")
 }
 
-print("Fetching TikTok data from Apify...")
+apify_urls <- strsplit(apify_urls_str, ",")[[1]]
+apify_urls <- trimws(apify_urls)
+# Remove any leftover literal quotes or hidden newlines that might cause the bad IPv6 error
+apify_urls <- gsub("[\"'\r\n]", "", apify_urls)
 
-# Fetch and parse the data from URL
-req <- request(apify_url) |> req_perform()
-raw_data <- resp_body_json(req, simplifyVector = TRUE)
+print(paste("Fetching TikTok data from", length(apify_urls), "Apify dataset(s)..."))
 
-# Force R to flatten the nested tables into normal columns with dots
-flat_data <- jsonlite::flatten(as.data.frame(raw_data))
+all_data_list <- list()
+
+for (url in apify_urls) {
+  req <- request(url) |> req_perform()
+  raw_data <- resp_body_json(req, simplifyVector = TRUE)
+  
+  # Flatten the nested tables into normal columns with dots
+  flat_data <- jsonlite::flatten(as.data.frame(raw_data))
+  all_data_list[[length(all_data_list) + 1]] <- flat_data
+}
+
+# Combine all fetched datasets
+combined_flat_data <- bind_rows(all_data_list)
 
 print("Data fetched and flattened successfully! Cleaning columns...")
 
 # Cleaning
-clean_tiktok <- flat_data |>
+clean_tiktok <- combined_flat_data |>
   select(
     timestamp = createTimeISO,
     caption = text,

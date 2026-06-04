@@ -1,0 +1,321 @@
+---
+title: "Matcha Consumer Interest and Digital Market Analysis"
+format: 
+  dashboard:
+    orientation: columns
+    theme: flatly
+    nav-buttons: github
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(zoo)
+library(arrow)
+library(scales)
+library(lubridate)
+library(ggrepel)
+library(ggbeeswarm)
+
+# ==========================================
+# GOOGLE TRENDS DATA PREP
+# ==========================================
+all_df <- read_csv("data/clean/clean_time_series_US_6.csv")
+
+# Convert to tidy format and rename
+tidy_df <- all_df |>
+  pivot_longer(
+    cols = c(matcha, chai, cold_brew, mocha, refresher, psl, smoothie),
+    names_to = "keyword",
+    values_to = "interest"
+  ) |>
+  mutate(
+    keyword = recode(
+      keyword,
+      matcha = "Matcha",
+      chai = "Chai",
+      cold_brew = "Cold Brew",
+      mocha = "Mocha",
+      refresher = "Refresher",
+      psl = "Pumpkin Spice Latte",
+      smoothie = "Smoothie"
+    )
+  )
+
+growth_stats <- tidy_df |>
+  mutate(year = year(time)) |>
+  group_by(keyword, year) |>
+  summarise(
+    yearly_avg = mean(interest, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  group_by(keyword) |>
+  summarise(
+    first_avg = first(yearly_avg),
+    last_avg = last(yearly_avg),
+    pct_growth = if_else(
+      first_avg > 0,
+      ((last_avg - first_avg) / first_avg) * 100,
+      NA_real_
+    ),
+    .groups = "drop"
+  )
+# Growth stability matrix info
+matrix_info <- tidy_df |>
+  group_by(keyword) |>
+  summarise(
+    volatility = sd(interest, na.rm = TRUE) / mean(interest, na.rm = TRUE),
+    first_year_avg = mean(head(interest, 12), na.rm = TRUE),
+    last_year_avg = mean(tail(interest, 12), na.rm = TRUE),
+    growth_rate = (last_year_avg - first_year_avg) / first_year_avg,
+    .groups = 'drop'
+  )
+
+median_growth <- median(matrix_info$growth_rate, na.rm = TRUE)
+median_volatility <- median(matrix_info$volatility, na.rm = TRUE)
+
+# Monthly Seasonality Dataframe
+monthly_avg <- tidy_df |>
+  mutate(month = month(time, label = TRUE, abbr = TRUE)) |>
+  group_by(keyword, month) |>
+  summarise(avg_interest = mean(interest, na.rm = TRUE), .groups = "drop")
+
+# Filter for recent trends (for Rolling Average plot)
+trends_recent <- tidy_df |>
+  filter(time >= as.Date("2016-01-01"))
+
+# Rolling Average Dataframe
+rol_avg <- trends_recent |>
+  group_by(keyword) |>
+  arrange(time) |>
+  mutate(rolling_avg = rollmean(interest, k = 6, fill = NA))
+
+# ==========================================
+# TIKTOK DATA PREP
+# ==========================================
+tagged_data <- read_parquet("data/clean/clean_tiktok_data_tagged.parquet")
+
+tag_counts <- tagged_data |>
+  summarise(
+    Starbucks = sum(commercial),
+    `Powder Quality` = sum(traditional),
+    `Flavors` = sum(flavor_innovation),
+    `General Matcha` = sum(cafe_beverage)
+  ) |>
+  pivot_longer(
+    everything(),
+    names_to = "category",
+    values_to = "count"
+  ) |>
+  # Calculate frequency percentage 
+  mutate(percentage = count / sum(count))
+
+engagement_rates <- tagged_data |>
+  select(
+    engagement_rate,
+    commercial,
+    traditional,
+    flavor_innovation,
+    cafe_beverage
+  ) |>
+  pivot_longer(
+    cols = c(
+      commercial,
+      traditional,
+      flavor_innovation,
+      cafe_beverage
+    ),
+    names_to = "theme",
+    values_to = "present"
+  ) |>
+  filter(present) |>
+  mutate(
+    theme = recode(
+      theme,
+      commercial = "Starbucks",
+      traditional = "Powder Quality",
+      flavor_innovation = "Flavors",
+      cafe_beverage = "General Beverage"
+    )
+  )
+
+paired_stats <- tagged_data |>
+  summarise(
+    commercial_total = sum(commercial, na.rm = TRUE),
+    overlap1 = sum(commercial & flavor_innovation, na.rm = TRUE)
+  ) |>
+  mutate(
+    pct_overlap1 = overlap1 / commercial_total * 100
+  )
+
+powder_stat <- engagement_rates |>
+  group_by(theme) |>
+  summarise(med_eng = median(engagement_rate, na.rm = TRUE), .groups = "drop") |>
+  filter(theme %in% c("Powder Quality", "Starbucks")) |>
+  pivot_wider(names_from = theme, values_from = med_eng) |>
+  mutate(multiplier = `Powder Quality` / Starbucks) |>
+  pull(multiplier)
+```
+
+# Analysis
+
+## Column {width="20%"}
+
+### Matcha Search Growth {fill="false"}
+```{r}
+#| echo: false
+#| warning: false
+matcha_growth <- growth_stats |>
+  filter(keyword == "Matcha") |>
+  pull(pct_growth)
+```
+
+<div style="font-size: 2.2em; font-weight: bold; text-align: center; padding: 5px; color: #2C3E50;">
+`r sprintf("+%.1f%%", matcha_growth)`
+</div>
+<div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
+Increase in Google search interest of "Matcha" from 2021 to 2026
+</div>
+
+### Starbucks & Flavor Overlap {fill="false"}
+```{r}
+#| echo: false
+#| warning: false
+overlap_val <- paired_stats |> pull(pct_overlap1)
+```
+
+<div style="font-size: 2.2em; font-weight: bold; text-align: center; padding: 5px; color: #2C3E50;">
+`r sprintf("%.1f%%", overlap_val)`
+</div>
+<div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
+of Starbucks matcha videos feature flavor variety (ex: strawberry matcha or ube matcha)
+</div>
+
+### Powder Quality vs. Starbucks {fill="false"}
+```{r}
+#| echo: false
+#| warning: false
+```
+
+<div style="font-size: 2.2em; font-weight: bold; text-align: center; padding: 5px; color: #2C3E50;">
+`r sprintf("%.1fx", powder_stat)`
+</div>
+<div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
+Despite lower total visibility, traditional "Powder Quality" content maintains 90% engagement parity with mainstream Starbucks trends.
+</div>
+
+
+## Column {width="40%"}
+
+### Growth Stability Matrix
+```{r}
+ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
+  # Quadrant Lines
+  geom_hline(yintercept = median_volatility, linetype = "dashed", linewidth = 0.8, color = "gray45") +
+  geom_vline(xintercept = median_growth, linetype = "dashed", linewidth = 0.8, color = "gray45") +
+  
+  geom_point(size = 5, color = "#0e288e", alpha = 0.8) +
+  geom_text_repel(size = 5, point.padding = 0.8, box.padding = 1.2, min.segment.length = 0, force = 3) + 
+  
+  scale_x_continuous(labels = label_percent()) +
+  scale_y_continuous(labels = label_percent()) +
+  
+  labs(
+    title = "Growth-Stability of Beverages",
+    subtitle = "Comparing long-term growth vs. search volume volatility",
+    x = "Long-Term Growth Rate (2021 vs. 2026)",
+    y = "Volatility (Coefficient of Variation)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 16), panel.grid.minor = element_blank(), panel.grid.major = element_line(color = "gray90"))
+```
+
+### Content Theme Frequency on TikTok
+```{r}
+ggplot(tag_counts, aes(x = reorder(category, -percentage), y = percentage, fill = category)) + 
+  geom_col(alpha = 0.8) + 
+  scale_y_continuous(labels = label_percent()) +
+  labs(
+    title = "Content Theme Frequency on TikTok",
+    subtitle = "Frequency of common matcha content themes across videos ",
+    x = "Content Theme",
+    y = "Percentage of Videos"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 16),
+    axis.text.x = element_text(size = 12)
+  ) + 
+  geom_text(
+    aes(label = percent(percentage, accuracy = 1)),
+    vjust = -0.4,
+    size = 4, 
+    fontface = "bold",
+    color = "gray30"
+  )
+```
+
+## Column {width="40%"}
+
+### Monthly Average Seasonal Line Plot
+```{r}
+# Data point for the label
+label_data <- monthly_avg |> 
+  filter(keyword == "Matcha", month == "Apr")
+
+# Line plot
+ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = keyword)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Average Monthly Search Interest by Beverage",
+    subtitle = "Seasonality patterns across beverage trends",
+    x = "Month",
+    y = "Average Search Interest",
+    color = "Beverage"
+  ) +
+  geom_text_repel(
+    data = label_data,
+    aes(label = "Growth in Matcha \ninterest during Spring"),
+    nudge_y = 13,
+    color = "gray20",
+    size = 4,
+    fontface = "italic",
+    box.padding = 0.5
+  ) + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    axis.text.x = element_text(angle = 45, hjust = 0.7)  
+  )
+```
+
+### Engagement Rate by Category Beeswarm Plot
+```{r}
+ggplot(engagement_rates, aes(x = reorder(theme, engagement_rate, FUN = median), y = engagement_rate, color = theme)) + 
+  geom_quasirandom(alpha = 0.6, size = 2.5, width = 0.2) + 
+  # Black point to show median
+  stat_summary(fun = median, geom = "point", shape = 15, size = 3, color = "black") +
+  scale_y_continuous(labels = label_percent()) + 
+  coord_cartesian(ylim = c(0, 0.3)) + 
+  labs(
+    title = "Engagement Rate Distribution by Matcha Content Themes",
+    subtitle = "Videos may belong to multiple themes. Black square indicates the median engagement rate. \nSample size varies per theme. \nEngagement is calculated by (Likes+Comments+Shares+Saves / Views)",
+    x = "Content Theme",
+    y = "Engagement Rate"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 16),
+    axis.text.x = element_text(size = 12)
+  )
+```
+
+
+# Data
+This dashboard integrates Google Trends search data with TikTok engagement data through Apify to examine matcha as a consumer beverage, combining macro-level demand signals with social media content behavior.
+
+
