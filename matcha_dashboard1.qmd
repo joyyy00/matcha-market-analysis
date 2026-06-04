@@ -215,7 +215,7 @@ ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
   geom_hline(yintercept = median_volatility, linetype = "dashed", linewidth = 0.8, color = "gray45") +
   geom_vline(xintercept = median_growth, linetype = "dashed", linewidth = 0.8, color = "gray45") +
   
-  geom_point(size = 5, color = "#0e288e", alpha = 0.8) +
+  geom_point(size = 5, color = "#0077BB", alpha = 0.8) +
   geom_text_repel(size = 5, point.padding = 0.8, box.padding = 1.2, min.segment.length = 0, force = 3) + 
   
   scale_x_continuous(labels = label_percent()) +
@@ -235,6 +235,7 @@ ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
 ```{r}
 ggplot(tag_counts, aes(x = reorder(category, -percentage), y = percentage, fill = category)) + 
   geom_col(alpha = 0.8) + 
+  scale_fill_viridis_d(option = "turbo", begin = 0.2, end = 0.8) + 
   scale_y_continuous(labels = label_percent()) +
   labs(
     title = "Content Theme Frequency on TikTok",
@@ -269,6 +270,7 @@ label_data <- monthly_avg |>
 ggplot(monthly_avg, aes(x = month, y = avg_interest, color = keyword, group = keyword)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +
+  scale_color_viridis_d(option = "turbo") +
   labs(
     title = "Average Monthly Search Interest by Beverage",
     subtitle = "Seasonality patterns across beverage trends",
@@ -298,6 +300,7 @@ ggplot(engagement_rates, aes(x = reorder(theme, engagement_rate, FUN = median), 
   geom_quasirandom(alpha = 0.6, size = 2.5, width = 0.2) + 
   # Black point to show median
   stat_summary(fun = median, geom = "point", shape = 15, size = 3, color = "black") +
+  scale_color_viridis_d(option = "turbo", begin = 0.2, end = 0.8) +
   scale_y_continuous(labels = label_percent()) + 
   coord_cartesian(ylim = c(0, 0.3)) + 
   labs(
