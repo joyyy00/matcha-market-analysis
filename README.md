@@ -62,6 +62,13 @@ To run this dashboard locally, ensure you have [R](https://cran.r-project.org/) 
 ```bash
 git clone [https://github.com/joyyy00/matcha-market-analysis.git](https://github.com/joyyy00/matcha-market-analysis.git)
 cd matcha-market-analysis
+```
+**2. Install required packages:**
+```bash
 install.packages(c("dplyr", "tidyr", "ggplot2", "zoo", "lubridate"))
-quarto render matcha_dashboard1.qmd
+```
 
+**3. Render Quarto dashboard:**
+```bash
+quarto render matcha_dashboard1.qmd
+```
