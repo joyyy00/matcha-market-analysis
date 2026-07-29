@@ -35,29 +35,23 @@ tidy_df1 <- tidy_df1 |>
 
 #====================================
 # Growth rate average stat:
-# Calculate the yearly average interest for each drink(keyword)
-# and then calculates the growth in percentage from the first
-# year to the most recent year (2021 - 2026).
+# Calculate the rolling 12-month interest for each drink(keyword) for 2021 and 2026.
+# Then calculate the growth in percentage from the first year to the most 
+# recent year.
 #====================================
 growth_stats <- tidy_df1 |>
-  mutate(year = year(time)) |>
-  group_by(keyword, year) |>
-  # Get the yearly average 
-  summarise(
-    yearly_avg = mean(interest, na.rm = TRUE)
-  ) |>
+  arrange(keyword, time) |>
   group_by(keyword) |>
-  # Calculations 
+
+  # Get the yearly average for first and last year
   summarise(
-    first_year = first(year),
-    last_year = last(year),
-    first_avg = first(yearly_avg),
-    last_avg = last(yearly_avg),
-    # Conditional statement for percent calculation
+    first_year = mean(head(interest, 12), na.rm = TRUE),
+    last_year = mean(tail(interest, 12), nam.rm = TRUE)
+  ,
     pct_growth = if_else(
-      first_avg > 0,
-      ((last_avg - first_avg) / first_avg) * 100,
-      NA_real_
+      first_year > 0,
+        ((last_year - first_year) / first_year) * 100,
+        NA_real_
     )
   ) |>
   # Arrange in descending order 

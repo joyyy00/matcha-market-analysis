@@ -43,24 +43,27 @@ tidy_df <- all_df |>
     )
   )
 
+# Rolling 12-month average growth stat (2021 vs 2026)
 growth_stats <- tidy_df |>
-  mutate(year = year(time)) |>
-  group_by(keyword, year) |>
-  summarise(
-    yearly_avg = mean(interest, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
+  arrange(keyword, time) |>
   group_by(keyword) |>
+
+  # Get the yearly average for first and last year
   summarise(
-    first_avg = first(yearly_avg),
-    last_avg = last(yearly_avg),
+    first_year = mean(head(interest, 12), na.rm = TRUE),
+    last_year = mean(tail(interest, 12), nam.rm = TRUE)
+  ,
     pct_growth = if_else(
-      first_avg > 0,
-      ((last_avg - first_avg) / first_avg) * 100,
-      NA_real_
+      first_year > 0,
+        ((last_year - first_year) / first_year) * 100,
+        NA_real_
     ),
-    .groups = "drop"
-  )
+  ) |>
+  
+  # Arrange in descending order 
+  arrange(desc(pct_growth))
+
+
 # Growth stability matrix info
 matrix_info <- tidy_df |>
   group_by(keyword) |>
@@ -158,7 +161,7 @@ powder_stat <- engagement_rates |>
   pull(multiplier)
 ```
 
-# Analysis
+# Analysis  
 
 ## Column {width="20%"}
 
@@ -175,7 +178,7 @@ matcha_growth <- growth_stats |>
 `r sprintf("+%.1f%%", matcha_growth)`
 </div>
 <div style="text-align: center; color: #7F8C8D; font-size: 0.9em;">
-Increase in Google search interest of "Matcha" from 2021 to 2026
+Growth in Trailing 12-Month search interest (June '25 - May '26 vs. Baseline)
 </div>
 
 ### Starbucks & Flavor Overlap {fill="false"}
@@ -235,7 +238,7 @@ ggplot(matrix_info, aes(x = growth_rate, y = volatility, label = keyword)) +
   labs(
     title = "Growth-Stability of Beverages",
     subtitle = "Comparing rolling 12-month volume averages against volatility",
-    x = "Long-Term Growth Rate (2021 vs. 2026)",
+    x = "Long-Term Growth Rate (Trailing 12-Months vs. Baseline)",
     y = "Volatility (Coefficient of Variation)"
   ) +
   theme_minimal() +
@@ -335,28 +338,22 @@ ggplot(engagement_rates, aes(x = reorder(theme, engagement_rate, FUN = median), 
 
 
 # Data & Additional Info
+
 This dashboard integrates Google Trends search data with TikTok engagement data to examine matcha as a consumer beverage, combining macro-level demand signals with social media content behavior.
 
+**Google Trends Data** 
 
-Google Trends Data
+Google Trends time-series data was collected for multiple beverage-related keywords: chai, cold brew, matcha, mocha, pumpkin spice latte, refresher, and smoothie. The dataset spans from June of 2021 to May of 2026 on a monthly resolution for the United States.
 
-Google Trends time-series data was collected for multiple beverage-related keywords, including matcha, matcha latte, strawberry matcha latte, boba, pumpkin spice latte, chai, mocha, cold brew, refresher, and smoothie. The dataset spans 2004–2026 on a monthly resolution for the United States.
-
-
-TikTok Data
+**TikTok Data**
 
 TikTok data was collected using the Apify API based on matcha-related hashtags. The final dataset contains approximately 520 videos. Each record includes engagement metrics such as views, likes, comments, shares, and saves.
 
-
-Tagging system
+**Theme Tagging System**
 
 To analyze content structure, videos were tagged using rule-based keyword detection applied to captions. These tags are not mutually exclusive, and a single video may belong to multiple tags.
 
+**Matrix Volatility Threshold**
 
-Limitations
+Volatility in the Growth-Stability Matrix is calculated using the Coefficient of Variation (COV) to normalize variance across different market sizes. The 75% (0.75) high-volatility threshold was selected as a business heuristic to isolate highly erratic, seasonal fads (e.g., Pumpkin Spice Latte) from stable, year-round consumer staples. While a standard metric flags COV > 1.0 as extreme and unstable, consumer search trends carry inherently more noise, making 0.75 a stricter test for stability. 
 
-Google Trends data is a relative index and does not represent absolute search volume. It is sensitive to normalization effects across time and cannot distinguish between informational and purchase intent.
-
-TikTok data is based on hashtag scraping and therefore reflects a partial view of platform activity. Content without relevant hashtags is not captured. Engagement metrics reflect attention and interaction, not direct consumer purchasing behavior.
-
-The tagging system is rule-based and keyword-driven, meaning categories represent heuristic content signals. 

@@ -86,10 +86,10 @@ grid-auto-rows: minmax(0, 1fr);">
 <div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
 <div class="card-body html-fill-item html-fill-container">
 <div style="font-size: 2.2em; font-weight: bold; text-align: center; padding: 5px; color: #2C3E50;" class="html-fill-item html-fill-container">
-+327.7%
++235.8%
 </div>
 <div style="text-align: center; color: #7F8C8D; font-size: 0.9em;" class="html-fill-item html-fill-container">
-<p>Increase in Google search interest of “Matcha” from 2021 to 2026</p>
+<p>Growth in Trailing 12-Month search interest (June ’25 - May ’26 vs.&nbsp;Baseline)</p>
 </div>
 </div>
 <bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
@@ -205,16 +205,18 @@ grid-auto-rows: minmax(0, 1fr);">
 <div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
 <div class="card-body html-fill-item html-fill-container">
 <p>This dashboard integrates Google Trends search data with TikTok engagement data to examine matcha as a consumer beverage, combining macro-level demand signals with social media content behavior.</p>
-<p>Google Trends Data</p>
-<p>Google Trends time-series data was collected for multiple beverage-related keywords, including matcha, matcha latte, strawberry matcha latte, boba, pumpkin spice latte, chai, mocha, cold brew, refresher, and smoothie. The dataset spans 2004–2026 on a monthly resolution for the United States.</p>
-<p>TikTok Data</p>
+<strong>Google Trends Data</strong>
+<p>Google Trends time-series data was collected for multiple beverage-related keywords: chai, cold brew, matcha, mocha, pumpkin spice latte, refresher, and smoothie. The dataset spans from June of 2021 to May of 2026 on a monthly resolution for the United States.</p>
+<strong>TikTok Data</strong>
 <p>TikTok data was collected using the Apify API based on matcha-related hashtags. The final dataset contains approximately 520 videos. Each record includes engagement metrics such as views, likes, comments, shares, and saves.</p>
-<p>Tagging system</p>
+<strong>Theme Tagging System</strong>
 <p>To analyze content structure, videos were tagged using rule-based keyword detection applied to captions. These tags are not mutually exclusive, and a single video may belong to multiple tags.</p>
-Limitations
-<p>Google Trends data is a relative index and does not represent absolute search volume. It is sensitive to normalization effects across time and cannot distinguish between informational and purchase intent.</p>
-<p>TikTok data is based on hashtag scraping and therefore reflects a partial view of platform activity. Content without relevant hashtags is not captured. Engagement metrics reflect attention and interaction, not direct consumer purchasing behavior.</p>
-<p>The tagging system is rule-based and keyword-driven, meaning categories represent heuristic content signals.</p>
+<strong>Matrix Volatility Threshold</strong>
+<p>Volatility in the Growth-Stability Matrix is calculated using the Coefficient of Variation (COV) to normalize variance across different market sizes. The 75% (0.75) high-volatility threshold was selected as a business heuristic to isolate highly erratic, seasonal fads (e.g., Pumpkin Spice Latte) from stable, year-round consumer staples. While a standard metric flags COV &gt; 1.0 as extreme and unstable, consumer search trends carry inherently more noise, making 0.75 a stricter test for stability.</p>
+<strong>Limitations</strong>
+<p>Google Trends Data: The data is a relative index and does not represent absolute search volume. It is sensitive to normalization effects across time and cannot distinguish between informational and purchase intent.</p>
+<p>TikTok Data: The collection is based on hashtag scraping and therefore reflects a partial view of platform activity; content without relevant hashtags is not captured. Additionally, engagement metrics reflect attention and interaction, not direct consumer purchasing behavior.</p>
+<p>Tagging System: The methodology is rule-based and keyword-driven, meaning categories represent heuristic content signals rather than deep semantic analysis.</p>
 </div>
 <bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
     <template>Expand</template>
