@@ -69,10 +69,10 @@ uncategorized_data <- plot_data_tags |>
   )
 
 # Export excel file and manually categorize them
-# write.xlsx(uncategorized_data, "data/uncategorized_videos.xlsx", overwrite = TRUE)
+# write.xlsx(uncategorized_data, "data/process/uncategorized_videos.xlsx", overwrite = TRUE)
 
 # Import the manually labeled file
-manual_labels <- read_excel("data/uncategorized_videos.xlsx")
+manual_labels <- read_excel("data/process/uncategorized_videos.xlsx")
 
 # Convert TRUE/FALSE text to bool
 manual_labels <- manual_labels |>

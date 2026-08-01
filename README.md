@@ -5,17 +5,16 @@ Include dashboard photo here
 ## Summary 
 An end-to-end data pipeline and business intelligence dashboard analyzing the US consumer market for Matcha. 
 By integrating macro-level Google Trends search volume (2021–2026) with micro-level TikTok engagement metrics (~520 videos), 
-this analysis bridges social media content strategy with long-term market stability forecasting. The resulting dashboard 
-successfully isolates sustainable market growth from erratic seasonal fads.
+this analysis bridges social media content strategy with long-term market stability forecasting.
 
 ## Insights
 * **The Trailing 12-Month (TTM) Growth:** Matcha search interest experienced a **+235.8%** Trailing 12-Month baseline growth 
     (June 2025–May 2026) compared to the initial 12-month baseline, indicating aggressive but sustained market penetration.
     
 * **Volatility & Market Predictability:** By engineering a Growth-Stability Matrix and establishing a **0.75 Coefficient of 
-    Variation (CV)** threshold, the analysis mathematically proves Matcha behaves as a low-volatility staple.
+    Variation (CV)** threshold, the analysis mathematically proves Matcha behaves as a **low-volatility** staple.
     
-* **Commercial Dependency on Flavor Innovation:** Matrix cross-filtering revealed a **1/3>** overlap between commercial beverage 
+* **Commercial Dependency on Flavor Innovation:** Matrix cross-filtering revealed a **> 33%** overlap between commercial beverage 
     content such as Starbucks and flavor innovation tags. This indicates that consumers are attracted to novel flavor 
     combinations (like strawberry or ube) and brands capitalize on that idea to maintain relevance and capture engagement.
     
@@ -23,14 +22,14 @@ successfully isolates sustainable market growth from erratic seasonal fads.
     and massive commercial brand content. This proves that while traditional content generates fewer raw views, its active audience 
     engagement efficiency is nearly identical to corporate giants.
 
-## Advanced Analytics & Methodology
+## Analytics & Methodology
 
 This project goes beyond surface-level aggregation, utilizing advanced data engineering and statistical smoothing to uncover true market signals.
 
 *   **Composite Feature Engineering:** Raw TikTok metrics (likes, comments, shares, saves) were synthesized into a unified `Engagement Rate` composite 
     feature, normalizing interaction intensity against total video exposure.
-*   **Time-Series Smoothing (Moving Averages):** Implemented a 6-month rolling moving average (`zoo::rollmean`) on the Google Trends dataset to strip 
-    out monthly volatility, successfully exposing the underlying multi-year macro-trend line.
+*   **Seasonality Aggregation:** Grouped time-series data by month and extracted the mean search interest to build a seasonal baseline, exposing heavy 
+    Spring demand cycles while stripping out year-over-year volume inflation.
 *   **Trailing Twelve-Month (TTM) Cutoffs:** Growth rates were calculated using programmatic `head(12)` and `tail(12)` trailing functions, effectively 
     neutralizing the statistical bias caused by mid-year data cutoffs.
 *   **Boolean Intersection Profiling:** Utilized non-mutually exclusive logical tagging to isolate categorical overlap, mathematically proving the 
@@ -39,7 +38,7 @@ This project goes beyond surface-level aggregation, utilizing advanced data engi
 ## Technical Stack
 
 *   **Data Acquisition:** Apify API (TikTok), Google Trends
-*   **Data Processing:** R (`dplyr`, `tidyr`, `zoo`, `lubridate`)
+*   **Data Processing:** R (`dplyr`, `tidyr`, `lubridate`)
 *   **Visualization:** R (`ggplot2` - custom matrix, time-series plot, bar chart, bee swarm plot)
 *   **Dashboard Deployment:** Quarto (Markdown-based, static HTML rendering)
 
@@ -60,12 +59,12 @@ To run this dashboard locally, ensure you have [R](https://cran.r-project.org/) 
 
 **1. Clone the repository:**
 ```bash
-git clone [https://github.com/joyyy00/matcha-market-analysis.git](https://github.com/joyyy00/matcha-market-analysis.git)
+git clone https://github.com/joyyy00/matcha-market-analysis.git
 cd matcha-market-analysis
 ```
 **2. Install required packages:**
 ```bash
-install.packages(c("dplyr", "tidyr", "ggplot2", "zoo", "lubridate"))
+install.packages(c("tidyverse", "arrow", "scales", "ggrepel", "ggbeeswarm"))
 ```
 
 **3. Render Quarto dashboard:**
