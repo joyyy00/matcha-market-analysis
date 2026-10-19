@@ -1,7 +1,8 @@
 # Matcha Market Intelligence: Consumer Demand & Content Analysis 
 
 <img width="1243" height="700" alt="image" src="https://github.com/user-attachments/assets/16bb4f3d-bd0f-4313-b8f1-0a167d5f6f0a" />
-Check out [Dashboard](https://019ead93-3cc7-3c7f-40c7-048e2cc8f2f3.share.connect.posit.cloud/#analysis)
+
+Check out the [dashboard](https://019ead93-3cc7-3c7f-40c7-048e2cc8f2f3.share.connect.posit.cloud/#analysis)
 
 ## Summary 
 An end-to-end data pipeline and business intelligence dashboard analyzing the US consumer market for Matcha. 
