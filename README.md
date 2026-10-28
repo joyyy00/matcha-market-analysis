@@ -10,19 +10,11 @@ By integrating macro-level Google Trends search volume (2021–2026) with micro-
 this analysis bridges social media content strategy with long-term market stability forecasting.
 
 ## Insights
-* **The Trailing 12-Month (TTM) Growth:** Matcha search interest experienced a **+235.8%** Trailing 12-Month baseline growth 
-    (June 2025–May 2026) compared to the initial 12-month baseline, indicating aggressive but sustained market penetration.
-    
-* **Volatility & Market Predictability:** By engineering a Growth-Stability Matrix and establishing a **0.75 Coefficient of 
-    Variation (CV)** threshold, the analysis mathematically proves Matcha behaves as a **low-volatility** staple.
-    
-* **Commercial Dependency on Flavor Innovation:** Matrix cross-filtering revealed a **> 33%** overlap between commercial beverage 
-    content such as Starbucks and flavor innovation tags. This indicates that consumers are attracted to novel flavor 
-    combinations (like strawberry or ube) and brands capitalize on that idea to maintain relevance and capture engagement.
-    
-* **The Engagement Parity Multiplier:** Calculated a **0.9x** engagement parity metric between Traditional/Ceremonial matcha content 
-    and massive commercial brand content. This proves that while traditional content generates fewer raw views, its active audience 
-    engagement efficiency is nearly identical to corporate giants.
+## Insights
+- **The Long-Term Growth:** Matcha search interest experienced a **+327.7%** increase from 2021 to 2026, indicating aggressive but sustained market penetration. 
+- **Volatility & Market Predictability:** By engineering a Growth-Stability Matrix and establishing a **0.75 Coefficient of Variation (CV)** threshold, the analysis mathematically proves Matcha behaves as a **low-volatility** staple.
+- **Commercial Dependency on Flavor Innovation:** Matrix cross-filtering revealed that **36.1%** of Starbucks matcha videos feature flavor variety (like strawberry or ube matcha). This indicates that consumers are attracted to novel flavor combinations, and brands capitalize on that idea to maintain relevance and capture engagement.
+- **The Engagement Parity Multiplier:** Calculated a **0.9x** engagement parity metric between Traditional/Ceremonial matcha content and commercial brand content. This proves that while traditional content has a smaller overall reach, it successfully generates **90%** as much active viewer engagement as corporate giants like Starbucks.
 
 ## Analytics & Methodology
 
