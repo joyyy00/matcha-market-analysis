@@ -10,7 +10,6 @@ By integrating macro-level Google Trends search volume (2021–2026) with micro-
 this analysis bridges social media content strategy with long-term market stability forecasting.
 
 ## Insights
-## Insights
 - **The Long-Term Growth:** Matcha search interest experienced a **+327.7%** increase from 2021 to 2026, indicating aggressive but sustained market penetration. 
 - **Volatility & Market Predictability:** By engineering a Growth-Stability Matrix and establishing a **0.75 Coefficient of Variation (CV)** threshold, the analysis mathematically proves Matcha behaves as a **low-volatility** staple.
 - **Commercial Dependency on Flavor Innovation:** Matrix cross-filtering revealed that **36.1%** of Starbucks matcha videos feature flavor variety (like strawberry or ube matcha). This indicates that consumers are attracted to novel flavor combinations, and brands capitalize on that idea to maintain relevance and capture engagement.
