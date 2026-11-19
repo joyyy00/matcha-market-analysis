@@ -1,6 +1,6 @@
 # Matcha Market Intelligence: Consumer Demand & Content Analysis 
 
-<img width="1243" height="700" alt="image" src="https://github.com/user-attachments/assets/16bb4f3d-bd0f-4313-b8f1-0a167d5f6f0a" />
+<img width="1161" height="623" alt="Screenshot 2026-11-19 140145" src="https://github.com/user-attachments/assets/cdab7fd3-09b9-422e-8c2d-933f5bd59c67"/>
 
 Check out the [dashboard](https://019ead93-3cc7-3c7f-40c7-048e2cc8f2f3.share.connect.posit.cloud/#analysis)
 
