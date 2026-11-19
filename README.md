@@ -6,27 +6,36 @@ Check out the [dashboard](https://019ead93-3cc7-3c7f-40c7-048e2cc8f2f3.share.con
 
 ## Summary 
 An end-to-end data pipeline and business intelligence dashboard analyzing the US consumer market for Matcha. 
-By integrating macro-level Google Trends search volume (2021–2026) with micro-level TikTok engagement metrics (~520 videos), 
-this analysis bridges social media content strategy with long-term market stability forecasting.
+By integrating macro-level Google Trends search interest (2021–2026) with micro-level TikTok engagement metrics (about 560 videos), this analysis bridges social media content strategy with long-term market variability.
+
+## Stakeholder Scenario
+A marketing lead at a local US cafe wants to decide whether matcha is a year round line or a short seasonal drop, and how to split the content budget.
+
+**Business Question:** Over the last five years in the US, has matcha search interest behaved like a stable beverage or a temporary trend, and which content type deserves the posting budget?
+
 
 ## Insights
-- **The Long-Term Growth:** Matcha search interest experienced a **+327.7%** increase from 2021 to 2026, indicating aggressive but sustained market penetration. 
-- **Volatility & Market Predictability:** By engineering a Growth-Stability Matrix and establishing a **0.75 Coefficient of Variation (CV)** threshold, the analysis mathematically proves Matcha behaves as a **low-volatility** staple.
-- **Commercial Dependency on Flavor Innovation:** Matrix cross-filtering revealed that **36.1%** of Starbucks matcha videos feature flavor variety (like strawberry or ube matcha). This indicates that consumers are attracted to novel flavor combinations, and brands capitalize on that idea to maintain relevance and capture engagement.
-- **The Engagement Parity Multiplier:** Calculated a **0.9x** engagement parity metric between Traditional/Ceremonial matcha content and commercial brand content. This proves that while traditional content has a smaller overall reach, it successfully generates **90%** as much active viewer engagement as corporate giants like Starbucks.
+- **The Long-Term Growth:** The search interest experienced a **+235.8%** increase trailing 12 months ending May 2026 versus the 12 months ending May 2022. 
+- **Volatility & Market Predictability:** Matcha is the fastest-growing series in the set, with a coefficient of variation of 0.53: above 
+    the set median (~0.21), well below pumpkin spice latte (1.40).
+- **Starbucks and Flavor Overlap:** **36.1%** of Starbucks-tagged videos also carry a flavor keyword such as strawberry or ube. Dropping broad tokens such as sugar, fruit, and butter leaves this share unchanged.
+- **Engagement and Reach:** Among videos with at least 1,000 views, Ceremonial/Traditional content has a median engagement rate **0.97×** Starbucks (121 videos, median 94,000 views, versus 150 videos and a median of 160,850 views). The rates are about equal. Starbucks has the larger reach.
+
+## Decisions
+- **Promote matcha in spring and keep it on the menu the rest of the year.** Search interest is up 235.8% on a trailing 12-month basis, the fastest gain in this set. Variability is 0.53, above the median of about 0.21 and below pumpkin spice latte at 1.40. After removing the multi-year 
+rise, March–May is still the high and November is still the low, at 0.87 of a normal month. Revisit this if the March–May lift disappears, or if variability rises toward 1.40.
+- **Put the posting budget on cafe-drink videos.** Among videos with at least 1,000 views, captions with "latte" lead both measures: 315 videos, a median of 285,800 views, and a 7.6% median engagement rate.
+- **Use flavor and ceremonial posts as support, not as the reach plan.** A flavor word appears in 36.1% of Starbucks-tagged videos. Inside that set, captions without a flavor word have the higher median views, 246,600 versus 91,600. Flavor-tagged videos overall have a 7.1% engagement 
+rate and a median of 102,850 views. Ceremonial posts match the Starbucks tag on engagement at 0.97× and reach fewer people, a median of 94,000 views versus 160,850. Those Starbucks views are spread across many creators, with at most 3 videos from any one account, so they do not transfer 
+to this brand’s own account.
 
 ## Analytics & Methodology
-
-This project goes beyond surface-level aggregation, utilizing advanced data engineering and statistical smoothing to uncover true market signals.
-
 *   **Composite Feature Engineering:** Raw TikTok metrics (likes, comments, shares, saves) were synthesized into a unified `Engagement Rate` composite 
     feature, normalizing interaction intensity against total video exposure.
-*   **Seasonality Aggregation:** Grouped time-series data by month and extracted the mean search interest to build a seasonal baseline, exposing heavy 
-    Spring demand cycles while stripping out year-over-year volume inflation.
+*   **Detrended Seasonality:** Each month is divided by that keyword's trailing 12-month mean, then averaged by calendar month. This removes the rise in the level of the series. Matcha's detrended index still peaks in March–May and is lowest in November.
 *   **Trailing Twelve-Month (TTM) Cutoffs:** Growth rates were calculated using programmatic `head(12)` and `tail(12)` trailing functions, effectively 
     neutralizing the statistical bias caused by mid-year data cutoffs.
-*   **Boolean Intersection Profiling:** Utilized non-mutually exclusive logical tagging to isolate categorical overlap, mathematically proving the 
-    dependency of commercial beverage brands on novel flavor trends.
+*   **Overlapping Tags:** Videos can carry more than one theme. The Starbucks flavor figure is the share of Starbucks-tagged videos that also match a specific flavor keyword. Theme frequency is the share of videos, not the share of tags.
 
 ## Technical Stack
 
@@ -57,10 +66,10 @@ cd matcha-market-analysis
 ```
 **2. Install required packages:**
 ```bash
-install.packages(c("tidyverse", "arrow", "scales", "ggrepel", "ggbeeswarm"))
+install.packages(c("tidyverse", "arrow", "scales", "ggrepel", "zoo", ggbeeswarm", "readxl", "openxlsx", "httr2"))
 ```
 
 **3. Render Quarto dashboard:**
 ```bash
-quarto render matcha_dashboard1.qmd
+quarto render matcha_dashboard.qmd
 ```

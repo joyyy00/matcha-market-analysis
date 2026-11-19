@@ -21,10 +21,10 @@ plot_data <- tiktok_data |>
     
     # Hierarchical Classification  
     category = case_when(
-      str_detect(caption_lower, "ceremonial") ~ "Traditional",
-      str_detect(caption_lower, "strawberry|ube|vanilla|coconut|banana|fruit|berry|sugar|blueberry|mango|butter|lavender") ~ "Flavor Innovation",
-      str_detect(caption_lower, "starbucks") ~ "Commercial",
-      str_detect(caption_lower, "latte") ~ "Cafe Beverage",
+      str_detect(caption_lower, "ceremony|ceremonial|whisk|chawan") ~ "Ceremonial/Traditional",
+      str_detect(caption_lower, "strawberry|ube|vanilla|coconut|banana|berry|blueberry|mango|lavender") ~ "Flavors",
+      str_detect(caption_lower, "starbucks") ~ "Starbucks",
+      str_detect(caption_lower, "latte") ~ "General",
       TRUE ~ "General Matcha"
     )
   ) |>
@@ -45,16 +45,17 @@ plot_data_tags <- tiktok_data |>
     caption_lower = tolower(caption),
     
     # Multiple tags for each video
-    commercial = str_detect(caption_lower, "starbucks"),
-    traditional = str_detect(caption_lower, "ceremonial"),
-    flavor_innovation = str_detect(caption_lower, "strawberry|ube|vanilla|coconut|banana|fruit|berry|sugar|blueberry|mango|butter|lavender"),
+    starbucks = str_detect(caption_lower, "starbucks"),
+    traditional = str_detect(caption_lower, "ceremony|ceremonial|whisk|chawan"),
+    # Specific flavor words only. Broad tokens (sugar, fruit, butter) are excluded.
+    flavor_innovation = str_detect(caption_lower, "strawberry|ube|vanilla|coconut|banana|berry|blueberry|mango|lavender"),
     cafe_beverage = str_detect(caption_lower, "latte")
   )
 
 # Look at uncategorized videos
 uncategorized_data <- plot_data_tags |>
   filter(
-    !commercial &
+    !starbucks &
       !traditional &
       !flavor_innovation &
       !cafe_beverage
@@ -62,7 +63,7 @@ uncategorized_data <- plot_data_tags |>
   select(
     video_id,
     caption,
-    commercial,
+    starbucks,
     traditional,
     flavor_innovation,
     cafe_beverage
@@ -71,13 +72,12 @@ uncategorized_data <- plot_data_tags |>
 # Export excel file and manually categorize them
 # write.xlsx(uncategorized_data, "data/process/uncategorized_videos.xlsx", overwrite = TRUE)
 
-# Import the manually labeled file
-manual_labels <- read_excel("data/process/uncategorized_videos.xlsx")
-
-# Convert TRUE/FALSE text to bool
-manual_labels <- manual_labels |>
+# Import the manually labeled file.
+# The workbook still calls the Starbucks flag "commercial".
+manual_labels <- read_excel("data/process/uncategorized_videos.xlsx") |>
+  rename(starbucks = commercial) |>
   mutate(
-    commercial = as.logical(commercial),
+    starbucks = as.logical(starbucks),
     traditional = as.logical(traditional),
     flavor_innovation = as.logical(flavor_innovation),
     cafe_beverage = as.logical(cafe_beverage),
@@ -90,7 +90,7 @@ plot_data_tags_updated <- plot_data_tags |>
     manual_labels |>
       select(
         video_id,
-        commercial,
+        starbucks,
         traditional,
         flavor_innovation,
         cafe_beverage
@@ -121,15 +121,16 @@ tagged_data <- read_parquet("data/clean/clean_tiktok_data_tagged.parquet")
 #============================================
 engagement_rates <- tagged_data |>
   select(
+    views,
     engagement_rate,
-    commercial,
+    starbucks,
     traditional,
     flavor_innovation,
     cafe_beverage
   ) |>
   pivot_longer(
     cols = c(
-      commercial,
+      starbucks,
       traditional,
       flavor_innovation,
       cafe_beverage
@@ -143,12 +144,17 @@ engagement_rates <- tagged_data |>
   mutate(
     theme = recode(
       theme,
-      commercial = "Starbucks",
-      traditional = "Powder Quality",
+      starbucks = "Starbucks",
+      traditional = "Ceremonial/Traditional",
       flavor_innovation = "Flavors",
-      cafe_beverage = "General Beverage"
+      cafe_beverage = "General"
     )
   )
+
+# Engagement rates use videos with at least 1,000 views so a few
+# very small videos do not set the median.
+engagement_rates <- engagement_rates |>
+  filter(views >= 1000)
 
 
 #============================================
@@ -162,7 +168,7 @@ ggplot(engagement_rates, aes(x = reorder(theme, engagement_rate, FUN = median), 
   coord_cartesian(ylim = c(0, 0.3)) + 
   labs(
     title = "Engagement Rate Distribution by Matcha Content Themes",
-    subtitle = "Videos may belong to multiple themes. Black square indicates the median engagement rate. \nSample size varies per theme. \nEngagement is calculated by (Likes+Comments+Shares+Saves / Views)",
+    subtitle = "Videos with at least 1,000 views. A video may belong to more than one theme.\nBlack square indicates the median. Rates above 30% are outside the axis.\nEngagement = (likes + comments + shares + saves) / views",
     x = "Content Theme",
     y = "Engagement Rate"
   ) +
@@ -180,18 +186,18 @@ ggplot(engagement_rates, aes(x = reorder(theme, engagement_rate, FUN = median), 
 # Long data format for counts per tag 
 tag_counts <- tagged_data |>
   summarise(
-    Starbucks = sum(commercial),
-    `Powder Quality` = sum(traditional),
+    Starbucks = sum(starbucks),
+    `Ceremonial/Traditional` = sum(traditional),
     `Flavors` = sum(flavor_innovation),
-    `General Matcha` = sum(cafe_beverage)
+    `General` = sum(cafe_beverage)
   ) |>
   pivot_longer(
     everything(),
     names_to = "category",
     values_to = "count"
   ) |>
-  # Calculate frequency percentage 
-  mutate(percentage = count / sum(count))
+  # Share of videos, not share of tags. A video can carry more than one tag.
+  mutate(percentage = count / nrow(tagged_data))
 
 # Bar chart 
 ggplot(tag_counts, aes(x = reorder(category, -percentage), y = percentage, fill = category)) + 
@@ -199,7 +205,7 @@ ggplot(tag_counts, aes(x = reorder(category, -percentage), y = percentage, fill 
   scale_y_continuous(labels = label_percent()) +
   labs(
     title = "Content Theme Frequency on TikTok",
-    subtitle = "Frequency of common matcha content themes across videos ",
+    subtitle = "Share of videos carrying each tag. A video can carry more than one tag.",
     x = "Content Theme",
     y = "Percentage of Videos"
   ) +
@@ -216,7 +222,7 @@ ggplot(tag_counts, aes(x = reorder(category, -percentage), y = percentage, fill 
     fontface = "bold",
     color = "gray30"
   )
-  
+
 
 #============================================
 # Category Frequency Pairing Stat
@@ -224,37 +230,47 @@ ggplot(tag_counts, aes(x = reorder(category, -percentage), y = percentage, fill 
 # How many of starbucks videos are about flavors of general matcha?
 #============================================
 paired_stats <- tagged_data |>
-  # Calculates the sum of commercial videos and 
-  # sum of commercial and another category 
+  # Calculates the sum of starbucks videos and 
+  # sum of starbucks and another category 
   summarise(
-    commercial_total = sum(commercial),
-    overlap1 = sum(commercial & flavor_innovation),
-    overlap2 = sum(commercial & cafe_beverage)
+    starbucks_total = sum(starbucks),
+    overlap1 = sum(starbucks & flavor_innovation),
+    overlap2 = sum(starbucks & cafe_beverage)
   ) |>
   mutate(
     # overlap of starbucks and flavors 
-    pct_overlap1 = overlap1 / commercial_total * 100,
+    pct_overlap1 = overlap1 / starbucks_total * 100,
     # overlap of starbucks and general matcha content 
-    pct_overlap2 = overlap2 / commercial_total * 100
+    pct_overlap2 = overlap2 / starbucks_total * 100
   )
 
 paired_stats
 
 
 #============================================
-# Powder quality engagement vs. Starbucks 
-# Calculates how much more engagement a video 
-# featuring powder quality get than a starbucks video
+# Ceremonial/Traditional engagement vs. Starbucks
+# Rate, sample size, and median views. Videos under
+# 1,000 views are already excluded from engagement_rates.
 #============================================
-powder <- engagement_rates |>
+theme_reach <- engagement_rates |>
   group_by(theme) |>
-  summarise(med_eng = median(engagement_rate, na.rm = TRUE), .groups = "drop") |>
-  filter(theme %in% c("Powder Quality", "Starbucks")) |>
+  summarise(
+    n = n(),
+    med_eng = median(engagement_rate, na.rm = TRUE),
+    med_views = median(views, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+theme_reach
+
+ceremonial_vs_starbucks <- theme_reach |>
+  filter(theme %in% c("Ceremonial/Traditional", "Starbucks")) |>
+  select(theme, med_eng) |>
   pivot_wider(names_from = theme, values_from = med_eng) |>
-  mutate(multiplier = `Powder Quality` / Starbucks) |>
+  mutate(multiplier = `Ceremonial/Traditional` / Starbucks) |>
   pull(multiplier)
 
-powder
+ceremonial_vs_starbucks
 
 
 #============================================

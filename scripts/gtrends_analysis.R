@@ -42,16 +42,16 @@ tidy_df1 <- tidy_df1 |>
 growth_stats <- tidy_df1 |>
   arrange(keyword, time) |>
   group_by(keyword) |>
-
+  
   # Get the yearly average for first and last year
   summarise(
     first_year = mean(head(interest, 12), na.rm = TRUE),
-    last_year = mean(tail(interest, 12), nam.rm = TRUE)
-  ,
+    last_year = mean(tail(interest, 12), na.rm = TRUE)
+    ,
     pct_growth = if_else(
       first_year > 0,
-        ((last_year - first_year) / first_year) * 100,
-        NA_real_
+      ((last_year - first_year) / first_year) * 100,
+      NA_real_
     )
   ) |>
   # Arrange in descending order 
@@ -61,47 +61,52 @@ growth_stats
 
 
 #====================================
-# Monthly average seasonal pattern line plot
+# Detrended monthly pattern
+# Divide each month by that keyword's trailing 12-month mean,
+# then average the ratio by calendar month.
 #====================================
 seasonal <- tidy_df1 |>
-  # Get each month 
-  mutate(month = month(time, label = TRUE, abbr = TRUE)) |>
+  arrange(keyword, time) |>
+  group_by(keyword) |>
+  mutate(
+    ttm = zoo::rollmean(interest, k = 12, align = "right", fill = NA),
+    ratio = if_else(ttm > 0, interest / ttm, NA_real_),
+    month = month(time, label = TRUE, abbr = TRUE)
+  ) |>
+  filter(!is.na(ratio)) |>
   group_by(keyword, month) |>
-  # Get the average each month for each keyword 
-  summarise(
-    avg_interest = mean(interest, na.rm = TRUE),
-  )
+  summarise(avg_ratio = mean(ratio), .groups = "drop")
 
-# Data point for the label
-label_data <- monthly_avg |> 
-  filter(keyword == "Matcha", month == "Apr")
+# Data point for the label. March is matcha's detrended peak.
+label_data <- seasonal |>
+  filter(keyword == "Matcha", month == "Mar")
 
-# Line plot
-ggplot(seasonal, aes(x = month, y = avg_interest, color = keyword, group = keyword)) +
+ggplot(seasonal, aes(x = month, y = avg_ratio, color = keyword, group = keyword)) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "gray70") +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +
   labs(
-    title = "Average Monthly Search Interest by Beverage",
-    subtitle = "Seasonality patterns across beverage trends",
+    title = "Seasonal Search Interest, Trend Removed",
+    subtitle = "Each month divided by that beverage's trailing 12-month mean, then averaged.\n1.0 matches the trailing year.",
     x = "Month",
-    y = "Average Search Interest",
+    y = "Index Relative to Trailing 12-Month Mean",
     color = "Beverage"
   ) +
   geom_text_repel(
     data = label_data,
-    aes(label = "Growth in Matcha \ninterest during Spring"),
-    nudge_y = 13,
+    aes(label = "Matcha stays highest\nin spring"),
+    nudge_y = 0.35,
     color = "gray20",
     size = 4,
     fontface = "italic",
     box.padding = 0.5
-  ) + 
-  theme_minimal() + 
+  ) +
+  theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 16),
-    axis.text.x = element_text(angle = 45, hjust = 0.7)  
+    axis.text.x = element_text(angle = 45, hjust = 0.7)
   )
-  
+
 
 #====================================
 # Average Interest vs Volatility Scatter plot
@@ -127,8 +132,8 @@ ggplot(cv, aes(x = mean_interest, y = cv_interest, label = keyword)) +
   ) +
   theme_minimal() + 
   theme(plot.title = element_text(face = "bold", size = 16))
-  
-  
+
+
 #====================================
 # Growth stability matrix
 #====================================
