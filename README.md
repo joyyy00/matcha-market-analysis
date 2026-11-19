@@ -2,7 +2,7 @@
 
 <img width="1161" height="623" alt="Screenshot 2026-11-19 140145" src="https://github.com/user-attachments/assets/cdab7fd3-09b9-422e-8c2d-933f5bd59c67"/>
 
-Check out the [dashboard](https://019ead93-3cc7-3c7f-40c7-048e2cc8f2f3.share.connect.posit.cloud/#analysis)
+Check out the [dashboard](https://01a1f5e3-8f71-e97b-1a6c-0200d0c82615.share.connect.posit.cloud/)
 
 ## Summary 
 An end-to-end data pipeline and business intelligence dashboard analyzing the US consumer market for Matcha. 
